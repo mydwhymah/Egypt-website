@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Our Governorates</title>
+    <link rel="stylesheet" href="team.css">
+</head>
+<body>
+    <nav id="mainNav">
+        <div class="nav-container">
+            <a href="#" class="logo">Travel Guide</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#governorates">Governorates</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="video-container" id="home">
+        <div class="overlay"></div>
+        <video class="video-bg" autoplay muted loop id="myVideo">
+            <source src="/api/placeholder/400/320" type="video/mp4">
+        </video>
+        <div class="content">
+            <h1>Discover Our Heritage</h1>
+            <p>Explore the rich culture and breathtaking landscapes of our beautiful governorates</p>
+        </div>
+    </div>
+
+    <section class="gallery-section" id="governorates">
+        <div class="gallery-container">
+            <h2 class="section-title">Our Governorates</h2>
+            <div class="gallery">
+                <article class="gallery-item">
+                    <img src="ss.jpeg" alt="Governorate 1">
+                    <div class="gallery-content">
+                        <h2>Capital Governorate</h2>
+                        <p>Experience the vibrant heart of our nation, where modern life meets ancient history in perfect harmony.</p>
+                        <a href="#" class="read-more">Explore More</a>
+                    </div>
+                </article>
+                <article class="gallery-item">
+                    <img src="jj.jpeg" alt="Governorate 2">
+                    <div class="gallery-content">
+                        <h2>Coastal Governorate</h2>
+                        <p>Discover pristine beaches, crystal-clear waters, and charming coastal communities along our shores.</p>
+                        <a href="#" class="read-more">Explore More</a>
+                    </div>
+                </article>
+                <article class="gallery-item">
+                    <img src="juju.jpeg" alt="Governorate 3">
+                    <div class="gallery-content">
+                        <h2>Mountain Governorate</h2>
+                        <p>Venture into majestic mountains and experience traditional village life in our highland regions.</p>
+                        <a href="https://r.search.yahoo.com/_ylt=AwrFa62CXopn90ADAwRXNyoA;_ylu=Y29sbwNiZjEEcG9zAzEEdnRpZAMEc2VjA3Ny/RV=2/RE=1738331011/RO=10/RU=https%3a%2f%2fen.wikipedia.org%2fwiki%2fMokattam/RK=2/RS=QFnV3K9MCTU57j7UHFmcsnTdnd0-" class="read-more">Explore More</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <div class="audio-controls">
+        <button class="audio-btn" onclick="toggleSound()" id="soundBtn">
+            <span id="soundIcon">🔇</span> Toggle Sound
+        </button>
+    </div>
+
+    <script>
+        // Video sound toggle
+        const video = document.getElementById('myVideo');
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        let isMuted = true;
+
+        function toggleSound() {
+            if (isMuted) {
+                video.muted = false;
+                isMuted = false;
+                soundIcon.textContent = '🔊';
+            } else {
+                video.muted = true;
+                isMuted = true;
+                soundIcon.textContent = '🔇';
+            }
+        }
+
+        // Navbar scroll effect
+        const nav = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
