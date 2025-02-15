@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Master2000</title>
+    <style>
+        :root {
+            --bg-primary: #2c3e50;
+            --bg-secondary: #34495e;
+            --text-color: #ecf0f1;
+            --tile-shadow: rgba(0,0,0,0.2);
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg-primary);
+            font-family: 'Arial', sans-serif;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+        .game-container {
+            text-align: center;
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .color-tile {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--tile-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .color-tile::before {
+            content: '?';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        .color-tile.revealed {
+            transform: rotateY(180deg);
+        }
+        .color-tile.matched {
+            opacity: 0.5;
+            cursor: default;
+        }
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .btn {
+            background-color: #3498db;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        #timer {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-stats">
+            <div id="score">Score: 0</div>
+            <div id="timer">Time: 00:00</div>
+        </div>
+        <div id="message">Match all color pairs!</div>
+        <div class="game-board" id="gameBoard"></div>
+        <div class="control-buttons">
+            <button class="btn" onclick="resetGame()">Reset Game</button>
+            <button class="btn" onclick="changeGameMode()">Change Difficulty</button>
+        </div>
+    </div>
+
+    <script>
+        const gameDifficulties = [
+            { gridSize: 4, colors: 4 },   // Easy
+            { gridSize: 4, colors: 6 },   // Medium
+            { gridSize: 4, colors: 8 }    // Hard
+        ];
+        let currentDifficulty = 0;
+        
+        const colorPalette = [
+            'red', 'blue', 'green', 'yellow', 'purple', 
+            'orange', 'pink', 'cyan', 'magenta', 'lime', 
+            'teal', 'coral', 'gold', 'indigo', 'brown'
+        ];
+
+        let selectedTiles = [];
+        let matchedPairs = 0;
+        let score = 0;
+        let timer;
+        let seconds = 0;
+        let gameStarted = false;
+
+        function createBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            const { gridSize, colors } = gameDifficulties[currentDifficulty];
+            const selectedColors = colorPalette.slice(0, colors);
+            const doubledColors = [...selectedColors, ...selectedColors];
+            const shuffledColors = doubledColors.sort(() => Math.random() - 0.5);
+
+            gameBoard.innerHTML = '';
+            gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+
+            shuffledColors.forEach((color, index) => {
+                const tile = document.createElement('div');
+                tile.classList.add('color-tile');
+                tile.dataset.color = color;
+                tile.dataset.index = index;
+                tile.addEventListener('click', handleTileClick);
+                gameBoard.appendChild(tile);
+            });
+
+            resetGameState();
+        }
+
+        function handleTileClick(event) {
+            const tile = event.target;
+            
+            if (!gameStarted) {
+                startTimer();
+                gameStarted = true;
+            }
+
+            if (selectedTiles.length < 2 && 
+                !tile.classList.contains('matched') && 
+                !tile.classList.contains('revealed')) {
+                
+                tile.style.backgroundColor = tile.dataset.color;
+                tile.classList.add('revealed');
+                selectedTiles.push(tile);
+
+                if (selectedTiles.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [tile1, tile2] = selectedTiles;
+            const color1 = tile1.dataset.color;
+            const color2 = tile2.dataset.color;
+
+            if (color1 === color2) {
+                tile1.classList.add('matched');
+                tile2.classList.add('matched');
+                matchedPairs++;
+                score += 10;
+                document.getElementById('score').textContent = `Score: ${score}`;
+                document.getElementById('message').textContent = 'Great match!';
+            } else {
+                tile1.style.backgroundColor = '';
+                tile2.style.backgroundColor = '';
+                tile1.classList.remove('revealed');
+                tile2.classList.remove('revealed');
+                score -= 5;
+                document.getElementById('score').textContent = `Score: ${score}`;
+                document.getElementById('message').textContent = 'Try again!';
+            }
+
+            selectedTiles = [];
+
+            if (matchedPairs === gameDifficulties[currentDifficulty].colors) {
+                stopTimer();
+                document.getElementById('message').textContent = 'Congratulations! You won!';
+            }
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                document.getElementById('timer').textContent = 
+                    `Time: ${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+        }
+
+        function changeGameMode() {
+            currentDifficulty = (currentDifficulty + 1) % gameDifficulties.length;
+            createBoard();
+        }
+
+        function resetGameState() {
+            selectedTiles = [];
+            matchedPairs = 0;
+            score = 0;
+            seconds = 0;
+            gameStarted = false;
+            stopTimer();
+            document.getElementById('score').textContent = 'Score: 0';
+            document.getElementById('timer').textContent = 'Time: 00:00';
+            document.getElementById('message').textContent = 'Match all color pairs!';
+        }
+
+        function resetGame() {
+            createBoard();
+        }
+
+        // Initialize the game board
+        createBoard();
+    </script>
+</body>
+</html>
